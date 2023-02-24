@@ -1,6 +1,6 @@
 
 -----------------------------------------------------------------------------------
--- Veaf scripts 5.0.3;2023.02.18.19.26.21
+-- Veaf scripts 5.0.4;2023.02.24.23.19.15
 -----------------------------------------------------------------------------------
 
 
@@ -5219,7 +5219,7 @@ veafRadio.Id = "RADIO"
 veafRadio.Version = "1.11.0"
 
 -- trace level, specific to this module
---veafRadio.LogLevel = "debug"
+--veafRadio.LogLevel = "trace"
 
 veaf.loggers.new(veafRadio.Id, veafRadio.LogLevel)
 
@@ -5473,26 +5473,24 @@ function veafRadio.eventHandler:onEvent(Event)
   -- Debug output.
   local _unitname = ""
 -- LOGGING DISABLED WHEN COMPILING(string.format("got event %s", veaf.p(EVENTS[Event.id])))
--- LOGGING DISABLED WHEN COMPILING(string.format("Event id        = %s", tostring(Event.id)))
--- LOGGING DISABLED WHEN COMPILING(string.format("Event time      = %s", tostring(Event.time)))
--- LOGGING DISABLED WHEN COMPILING(string.format("Event idx       = %s", tostring(Event.idx)))
--- LOGGING DISABLED WHEN COMPILING(string.format("Event coalition = %s", tostring(Event.coalition)))
--- LOGGING DISABLED WHEN COMPILING(string.format("Event group id  = %s", tostring(Event.groupID)))
+-- LOGGING DISABLED WHEN COMPILING(string.format("Event id        = %s", veaf.p(Event.id)))
+-- LOGGING DISABLED WHEN COMPILING(string.format("Event time      = %s", veaf.p(Event.time)))
+-- LOGGING DISABLED WHEN COMPILING(string.format("Event idx       = %s", veaf.p(Event.idx)))
+-- LOGGING DISABLED WHEN COMPILING(string.format("Event coalition = %s", veaf.p(Event.coalition)))
+-- LOGGING DISABLED WHEN COMPILING(string.format("Event group id  = %s", veaf.p(Event.groupID)))
   if Event.initiator ~= nil then
     _unitname = Event.initiator:getName()
--- LOGGING DISABLED WHEN COMPILING(string.format("Event ini unit  = %s", tostring(_unitname)))
+-- LOGGING DISABLED WHEN COMPILING(string.format("Event ini unit  = %s", veaf.p(_unitname)))
   end
--- LOGGING DISABLED WHEN COMPILING(string.format("Event text      = \n%s", tostring(Event.text)))
+-- LOGGING DISABLED WHEN COMPILING(string.format("Event text      = \n%s", veaf.p(Event.text)))
 
   local refreshRadioMenu = false
   -- human unit birth
   if Event.id == world.event.S_EVENT_BIRTH then
-
     if _unitname and veafRadio.humanUnits[_unitname] then
-      -- a human spawned in this slot ! Yay !
-      if veafRadio.humanUnits[_unitname] then
-        veafRadio.humanUnits[_unitname].spawned = true
-      end
+    -- a human spawned in this slot ! Yay !
+-- LOGGING DISABLED WHEN COMPILING(string.format("a human spawned in this slot: %s", veaf.p(_unitname)))
+    veafRadio.humanUnits[_unitname].spawned = true
 
       -- refresh the radio menu
       refreshRadioMenu = true
@@ -5730,19 +5728,24 @@ function veafRadio.refreshRadioSubmenu(parentRadioMenu, radioMenu, radioMeasures
   -- create the commands in the radio menu
   for count = 1,#radioMenu.commands do
     local command = radioMenu.commands[count]
+-- LOGGING DISABLED WHEN COMPILING(string.format("command=%s",veaf.p(command)))
 
     if not command.usage then
-    command.usage = veafRadio.USAGE_ForAll
+        command.usage = veafRadio.USAGE_ForAll
     end
     if command.usage ~= veafRadio.USAGE_ForAll then
     
         -- build menu for each player group
         local alreadyDoneGroups = {}
         for groupId, groupData in pairs(veafRadio.humanGroups) do
+-- LOGGING DISABLED WHEN COMPILING(string.format("groupId=%s",veaf.p(groupId)))
             for _, callsign in pairs(groupData.callsigns) do
+-- LOGGING DISABLED WHEN COMPILING(string.format("callsign=%s",veaf.p(callsign)))
                 local unitData = groupData.units[callsign]
                 local unitName = unitData.name
+-- LOGGING DISABLED WHEN COMPILING(string.format("unitName=%s",veaf.p(unitName)))
                 local humanUnit =  veafRadio.humanUnits[unitName]
+-- LOGGING DISABLED WHEN COMPILING(string.format("humanUnit=%s",veaf.p(humanUnit)))
 -- LOGGING DISABLED WHEN COMPILING(string.format("checking if unit %s is spawned",veaf.p(unitName)))
                 if humanUnit and humanUnit.spawned then
 -- LOGGING DISABLED WHEN COMPILING(string.format("add radio command for player unit %s",veaf.p(unitName)))
@@ -5803,6 +5806,7 @@ function veafRadio.addSecuredCommandToSubmenu(title, radioMenu, method, paramete
 end
 
 function veafRadio._addCommandToSubmenu(title, radioMenu, method, parameters, usage, isSecured)
+-- LOGGING DISABLED WHEN COMPILING(string.format("_addCommandToSubmenu(%s)",veaf.p(title)))
     local command = {}
     command.title = title
     command.method = method
@@ -35483,7 +35487,7 @@ veafGrass = {}
 veafGrass.Id = "GRASS"
 
 --- Version.
-veafGrass.Version = "2.3.1"
+veafGrass.Version = "2.3.2"
 
 -- trace level, specific to this module
 --veafGrass.LogLevel = "trace"
@@ -35640,7 +35644,7 @@ function veafGrass.buildFarpsUnits(hiddenOnMFD)
 -- LOGGING DISABLED WHEN COMPILING(string.format("found grassRunwayUnits[%s]= %s", name, veaf.p(unit)))
         end
 		--first two types should represent the same object depending on if you're on the MIST side or DCS side, as a safety added both
-        if (unit.type == "SINGLE_HELIPAD" or unit.type == "FARP_SINGLE_01" or unit.type == "FARP" or unit.type == "Invisible FARP") and name:upper():find('FARP ') then 
+        if (unit.type == "SINGLE_HELIPAD" or unit.type == "FARP_SINGLE_01" or unit.type == "FARP" or unit.type == "Invisible FARP") and name:upper():sub(1,5)=="FARP " then 
             farpUnits[name] = unit
 -- LOGGING DISABLED WHEN COMPILING(string.format("found farpUnits[%s]= %s", name, veaf.p(unit)))
         end
@@ -37263,6 +37267,7 @@ function veafNamedPoints.addDataToPoint(point, data)
 end
 
 function veafNamedPoints.buildPointsDatabase()
+-- LOGGING DISABLED WHEN COMPILING("buildPointsDatabase()")
     veafNamedPoints.namedPoints = {}
     for name, defaultPoint in pairs(veafNamedPoints.Points) do
         veafNamedPoints._addPoint(defaultPoint.name, defaultPoint.point)
@@ -37387,6 +37392,8 @@ end
 
 --- Build the initial radio menu
 function veafNamedPoints.buildRadioMenu()
+-- LOGGING DISABLED WHEN COMPILING("buildRadioMenu()")
+
     veafNamedPoints.rootPath = veafRadio.addSubMenu(veafNamedPoints.RadioMenuName)
     if not(veafRadio.skipHelpMenus) then
         veafRadio.addCommandToSubmenu("HELP", veafNamedPoints.rootPath, veafNamedPoints.help, nil, veafRadio.USAGE_ForGroup)
@@ -44416,6 +44423,6 @@ veaf.loggers.get(veafMissileGuardian.Id):info(string.format("Loading version %s"
 
 
 -----------------------------------------------------------------------------------
--- END OF Veaf scripts 5.0.3;2023.02.18.19.26.21
+-- END OF Veaf scripts 5.0.4;2023.02.24.23.19.15
 -----------------------------------------------------------------------------------
 
