@@ -1530,10 +1530,12 @@ function RotorOps.setupCTLD()
     return
   end
   if type(ctld.pickupZones[1][2]) == "number" then --ctld converts its string table to integer on load, so we'll see if that's happened already
-    trigger.action.outText("ERROR: CTLD Loaded Too Soon!!", 90)
+    if not(veaf) then -- don't warn if CTLD is already initialized by the VEAF scripts
+      trigger.action.outText("ERROR: CTLD Loaded Too Soon!!", 90)
+    end
     return
   end
-  
+
   --ctld.Debug = false
   ctld.enableCrates = RotorOps.CTLD_crates
   ctld.enabledFOBBuilding = false

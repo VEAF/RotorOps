@@ -11,14 +11,60 @@ def triggerSetup(rops, options):
     def lb(var):
         return str(options[var]).lower()
 
+    if options["veaf"]: # create the first VEAF triggers
+        # add trigger: choose scripts loading method
+        trig = dcs.triggers.TriggerStart(comment="choose scripts loading method (false = static, true = dynamic)")
+        trig.set_color("0x00ffffff") # cyan
+        trig.rules.append(dcs.condition.Predicate(dcs.action.String("return false -- scripts")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("VEAF_DYNAMIC_PATH = [[.\]]")))
+        rops.m.triggerrules.triggers.append(trig)
+
+        # add trigger: choose config loading method
+        trig = dcs.triggers.TriggerStart(comment="choose config loading method (false = static, true = dynamic)")    
+        trig.set_color("0x00ffffff") # cyan
+        trig.rules.append(dcs.condition.Predicate(dcs.action.String("return false -- config")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("VEAF_DYNAMIC_MISSIONPATH = [[.\]]")))
+        rops.m.triggerrules.triggers.append(trig)
+
+        # add trigger: mission start (dynamic method)
+        trig = dcs.triggers.TriggerStart(comment="mission start - dynamic")    
+        trig.set_color("0x00ff80ff") # light green
+        trig.rules.append(dcs.condition.Predicate(dcs.action.String("return VEAF_DYNAMIC_PATH~=nil")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("env.info(\"DYNAMIC SCRIPTS LOADING\")")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_PATH .. \"/src/scripts/community/mist.lua\"))()")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_PATH .. \"/src/scripts/community/SimpleTextToSpeech.lua\"))()")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_PATH .. \"/src/scripts/community/CTLD.lua\"))()")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_PATH .. \"/src/scripts/community/WeatherMark.lua\"))()")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_PATH .. \"/src/scripts/community/skynet-iads-compiled.lua\"))()")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_PATH .. \"/src/scripts/community/Hercules_Cargo.lua\"))()")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_PATH .. \"/src/scripts/community/HoundElint.lua\"))()")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_PATH .. \"/src/scripts/community/VeafDynamicLoader.lua\"))()")))
+        rops.m.triggerrules.triggers.append(trig)
+
+        # add trigger: mission start (static method)
+        trig = dcs.triggers.TriggerStart(comment="mission start - static")    
+        trig.set_color("0x00ff80ff") # light green
+        trig.rules.append(dcs.condition.Predicate(dcs.action.String("return VEAF_DYNAMIC_PATH==nil")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("env.info(\"STATIC SCRIPTS LOADING\")")))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["mist.lua"]))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["DCS-SimpleTextToSpeech.lua"]))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["CTLD-veaf.lua"]))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["WeatherMark.lua"]))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["skynet-iads-compiled.lua"]))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["Hercules_Cargo.lua"]))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["HoundElint.lua"]))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["veaf-scripts.lua"]))
+        rops.m.triggerrules.triggers.append(trig)
 
     game_flag = 100
     # Add the first trigger
     trig = dcs.triggers.TriggerOnce(comment="RotorOps Setup Scripts")
     trig.rules.append(dcs.condition.TimeAfter(1))
-    trig.actions.append(dcs.action.DoScriptFile(rops.scripts["mist_4_5_107_grimm.lua"]))
+    if not options["veaf"]: # don't load Mist here, VEAF triggers already do this
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["mist_4_5_107_grimm.lua"]))
     trig.actions.append(dcs.action.DoScriptFile(rops.scripts["Splash_Damage_2_0.lua"]))
-    trig.actions.append(dcs.action.DoScriptFile(rops.scripts["CTLD.lua"]))
+    if not options["veaf"]: # don't load CTLD here, VEAF triggers already do this
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["CTLD.lua"]))
     trig.actions.append(dcs.action.DoScriptFile(rops.scripts["RotorOps.lua"]))
     if options["perks"]:
         trig.actions.append(dcs.action.DoScriptFile(rops.scripts["RotorOpsPerks.lua"]))
@@ -39,6 +85,25 @@ def triggerSetup(rops, options):
     if options["script"]:
         trig.actions.append(dcs.action.DoScript(dcs.action.String((options["script"]))))
     rops.m.triggerrules.triggers.append(trig)
+
+    if options["veaf"]: # create the remaining VEAF triggers
+        # add trigger: mission config (dynamic method)
+        trig = dcs.triggers.TriggerOnce(comment="mission config - dynamic")
+        trig.set_color("0x8080ffff") # violet
+        trig.rules.append(dcs.condition.Predicate(dcs.action.String("return VEAF_DYNAMIC_MISSIONPATH~=nil")))
+        trig.rules.append(dcs.condition.TimeAfter(2))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("env.info(\"DYNAMIC CONFIG LOADING\")")))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("assert(loadfile(VEAF_DYNAMIC_MISSIONPATH .. \"/src/scripts/missionConfig.lua\"))()")))
+        rops.m.triggerrules.triggers.append(trig)
+
+        # add trigger: mission config (static method)
+        trig = dcs.triggers.TriggerOnce(comment="mission config - static")
+        trig.set_color("0x8080ffff") # violet
+        trig.rules.append(dcs.condition.Predicate(dcs.action.String("return VEAF_DYNAMIC_MISSIONPATH==nil")))
+        trig.rules.append(dcs.condition.TimeAfter(2))
+        trig.actions.append(dcs.action.DoScript(dcs.action.String("env.info(\"STATIC CONFIG LOADING\")")))
+        trig.actions.append(dcs.action.DoScriptFile(rops.scripts["missionConfig.lua"]))
+        rops.m.triggerrules.triggers.append(trig)
 
     # Add the second trigger
     trig = dcs.triggers.TriggerOnce(comment="RotorOps Setup Zones")

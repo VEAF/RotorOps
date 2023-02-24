@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MissionGeneratorUI.ui'
+# Form implementation generated from reading ui file 'd:\dev\_VEAF\RotorOps\Generator\MissionGeneratorUI.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         MainWindow.setFont(font)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("assets/icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("d:\\dev\\_VEAF\\RotorOps\\Generator\\assets/icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setWindowOpacity(4.0)
         MainWindow.setAutoFillBackground(False)
@@ -374,7 +374,7 @@ class Ui_MainWindow(object):
         self.missionImage.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.missionImage.setStyleSheet("")
         self.missionImage.setText("")
-        self.missionImage.setPixmap(QtGui.QPixmap("../assets/briefing1.png"))
+        self.missionImage.setPixmap(QtGui.QPixmap("d:\\dev\\_VEAF\\RotorOps\\Generator\\../assets/briefing1.png"))
         self.missionImage.setScaledContents(True)
         self.missionImage.setWordWrap(False)
         self.missionImage.setObjectName("missionImage")
@@ -387,7 +387,7 @@ class Ui_MainWindow(object):
         self.background_label = QtWidgets.QLabel(self.centralwidget)
         self.background_label.setGeometry(QtCore.QRect(1020, 600, 241, 51))
         self.background_label.setText("")
-        self.background_label.setPixmap(QtGui.QPixmap("../assets/rotorops-dkgray.png"))
+        self.background_label.setPixmap(QtGui.QPixmap("d:\\dev\\_VEAF\\RotorOps\\Generator\\../assets/rotorops-dkgray.png"))
         self.background_label.setScaledContents(True)
         self.background_label.setObjectName("background_label")
         self.rateButton1 = QtWidgets.QPushButton(self.centralwidget)
@@ -710,13 +710,3 @@ class Ui_MainWindow(object):
         self.action_rateButton4.setToolTip(_translate("MainWindow", "_rateButton4"))
         self.action_rateButton5.setText(_translate("MainWindow", "_rateButton5"))
         self.action_rateButton5.setToolTip(_translate("MainWindow", "_rateButton5"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

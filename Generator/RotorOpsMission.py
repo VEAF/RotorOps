@@ -60,27 +60,24 @@ class RotorOpsMission:
         # add all of our required sounds
         os.chdir(sound_directory)
         path = os.getcwd()
-        dir_list = os.listdir(path)
-        # print("Files and directories in '", path, "' :")
-        # print(dir_list)
-
-        for filename in dir_list:
-            if filename.endswith(".ogg"):
-                # print(filename)
-                key = self.m.map_resource.add_resource_file(filename)
-                self.res_map[filename] = key
+        dir_list = [[filename, os.path.join(dirPath, filename)] for dirPath, dirNames, filenames in os.walk(path) for filename in filenames if os.path.splitext(filename)[1] == '.ogg']
+        for filedata in dir_list:
+            filename = filedata[0]
+            fullpath = filedata[1]
+            logger.info("Adding sound to mission: " + fullpath)
+            key = self.m.map_resource.add_resource_file(fullpath)
+            self.res_map[filename] = key
 
         # add all of our lua scripts
         os.chdir(script_directory)
         path = os.getcwd()
-        dir_list = os.listdir(path)
-        # print("Files and directories in '", path, "' :")
-        # print(dir_list)
-
-        for filename in dir_list:
-            if filename.endswith(".lua"):
-                logger.info("Adding script to mission: " + filename)
-                self.scripts[filename] = self.m.map_resource.add_resource_file(filename)
+        dir_list = [[filename, os.path.join(dirPath, filename)] for dirPath, dirNames, filenames in os.walk(path) for filename in filenames if os.path.splitext(filename)[1] == '.lua']
+        for filedata in dir_list:
+            filename = filedata[0]
+            fullpath = filedata[1]
+            logger.info("Adding script to mission: " + fullpath)
+            key = self.m.map_resource.add_resource_file(fullpath)
+            self.scripts[filename] = key
 
     def getUnitsFromMiz(self, file, side='both'):
 
