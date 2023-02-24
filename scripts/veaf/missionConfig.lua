@@ -183,9 +183,7 @@ end
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 if veafNamedPoints then
 
-    veaf.loggers.get(veaf.Id):info("Loading configuration")
-
-    veaf.loggers.get(veaf.Id):info("init - veafNamedPoints")
+    veaf.loggers.get(veaf.Id):info("Loading named points")
     if theatre == "syria" then
         veafNamedPoints.Points = {
             -- Turkish Airports
@@ -291,11 +289,29 @@ if veafNamedPoints then
     else
         veaf.loggers.get(veaf.Id):warn(string.format("theatre %s is not yet supported by veafNamedPoints", theatre))
     end
-    -- points of interest
-    --table.insert(veafNamedPoints.Points,
-    --    {name="RANGE KhalKhalah",point=coord.LLtoLO("33.036180", "37.196608")},
-    --)
+  
+    veaf.loggers.get(veaf.Id):info("init - veafNamedPoints")
     veafNamedPoints.initialize()
+
+    -- points of interest
+    if (RotorOps) then
+        local RotorOps_Zones = {
+            "STAGING",
+            "STAGING_BASE",
+            "ALPHA",
+            "BRAVO",
+            "CHARLIE",
+            "DELTA",
+        }
+        for _, zoneName in pairs(RotorOps_Zones) do
+            veaf.loggers.get(veaf.Id):info("init - adding named point %s", veaf.p(zoneName))
+            local triggerZone = trigger.misc.getZone(zoneName)
+            if triggerZone then
+                veaf.loggers.get(veafNamedPoints.Id):trace("triggerZone=%s", veaf.p(triggerZone))
+                veafNamedPoints.addPoint(zoneName, triggerZone.point)
+            end         
+        end
+    end
 end
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -328,67 +344,74 @@ end
 -- configure CTLD
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 if ctld and RotorOps then
-  veaf.loggers.get(veaf.Id):info("init - ctld for RotorOps")
   
-  --ctld.Debug = false
-  ctld.enableCrates = RotorOps.CTLD_crates
-  ctld.enabledFOBBuilding = false
-  ctld.JTAC_lock = "vehicle"
-  ctld.location_DMS = true
-  ctld.numberOfTroops = 24 --max loading size
-  ctld.maximumSearchDistance = 4000 -- max distance for troops to search for enemy
-  ctld.maximumMoveDistance = 0 -- max distance for troops to move from drop point if no enemy is nearby
-  ctld.maximumDistanceLogistic = 300
-  ctld.minimumHoverHeight = 5.0 -- Lowest allowable height for crate hover
-  ctld.maximumHoverHeight = 15.0 -- Highest allowable height for crate hover
-  ctld.maxDistanceFromCrate = 7 -- Maximum distance from from crate for hover
-  ctld.hoverTime = 5 -- Time to hold hover above a crate for loading in seconds
-  
-  ctld.unitLoadLimits = {
-    -- Remove the -- below to turn on options
-     ["SA342Mistral"] = 4,
-     ["SA342L"] = 4,
-     ["SA342M"] = 4,
-     ["UH-1H"] = 10,
-     ["Mi-8MT"] = 24,
-     ["Mi-24P"] = 8,
-     ["UH-60L"] = 11,
-   }
-   
-   ctld.loadableGroups = {  
-    {name = "Small Standard Group (4)", inf = 2, mg = 1, at = 1 },
-    {name = "Standard Group (8)", inf = 4, mg = 2, at = 2 }, -- will make a loadable group with 6 infantry, 2 MGs and 2 anti-tank for both coalitions
-    {name = "Anti Air (5)", inf = 2, aa = 3  },
-    {name = "Anti Tank (8)", inf = 2, at = 6  },
-    {name = "Mortar Squad (6)", mortar = 6 },
-    {name = "JTAC Group (4)", inf = 3, jtac = 1 },
-    {name = "Small Platoon (16)", inf = 9, mg = 3, at = 3, aa = 1 },
-    {name = "Platoon (24)", inf = 10, mg = 5, at = 6, aa = 3 },
-   }
-   
-   
-   --add to CTLD default pickzone names.  This could be done in a loop but this should be more readable
-   --pickupZones = { "Zone name or Ship Unit Name", "smoke color", "limit (-1 unlimited)", "ACTIVE (yes/no)", "side (0 = Both sides / 1 = Red / 2 = Blue )", flag number (optional) }
-   table.insert(ctld.pickupZones, { "STAGING", RotorOps.pickup_zone_smoke, -1, "no", 0 })
-   table.insert(ctld.pickupZones, { "STAGING_BASE", RotorOps.pickup_zone_smoke, -1, "no", 0 })
-   table.insert(ctld.pickupZones, { "ALPHA_FARP", RotorOps.pickup_zone_smoke, -1, "no", 0 })
-   table.insert(ctld.pickupZones, { "BRAVO_FARP", RotorOps.pickup_zone_smoke, -1, "no", 0 })
-   table.insert(ctld.pickupZones, { "CHARLIE_FARP", RotorOps.pickup_zone_smoke, -1, "no", 0 })
-   table.insert(ctld.pickupZones, { "DELTA_FARP", RotorOps.pickup_zone_smoke, -1, "no", 0 })
-   table.insert(ctld.pickupZones, { "HELO_CARRIER", "none", -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "HELO_CARRIER_1", "none", -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops1", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops2", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops3", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops4", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops5", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops6", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops7", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops8", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops9", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
-   table.insert(ctld.pickupZones, { "troops10", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+  local initCTLD = function()
+    veaf.loggers.get(veaf.Id):info("init ctld for RotorOps")
+    
+    --ctld.Debug = false
+    ctld.enableCrates = RotorOps.CTLD_crates
+    ctld.enabledFOBBuilding = false
+    ctld.JTAC_lock = "vehicle"
+    ctld.location_DMS = true
+    ctld.numberOfTroops = 24 --max loading size
+    ctld.maximumSearchDistance = 4000 -- max distance for troops to search for enemy
+    ctld.maximumMoveDistance = 0 -- max distance for troops to move from drop point if no enemy is nearby
+    ctld.maximumDistanceLogistic = 300
+    ctld.minimumHoverHeight = 5.0 -- Lowest allowable height for crate hover
+    ctld.maximumHoverHeight = 15.0 -- Highest allowable height for crate hover
+    ctld.maxDistanceFromCrate = 7 -- Maximum distance from from crate for hover
+    ctld.hoverTime = 5 -- Time to hold hover above a crate for loading in seconds
+    
+    ctld.unitLoadLimits = {
+      -- Remove the -- below to turn on options
+      ["SA342Mistral"] = 4,
+      ["SA342L"] = 4,
+      ["SA342M"] = 4,
+      ["UH-1H"] = 10,
+      ["Mi-8MT"] = 24,
+      ["Mi-24P"] = 8,
+      ["UH-60L"] = 11,
+    }
+    
+    ctld.loadableGroups = {  
+      {name = "Small Standard Group (4)", inf = 2, mg = 1, at = 1 },
+      {name = "Standard Group (8)", inf = 4, mg = 2, at = 2 }, -- will make a loadable group with 6 infantry, 2 MGs and 2 anti-tank for both coalitions
+      {name = "Anti Air (5)", inf = 2, aa = 3  },
+      {name = "Anti Tank (8)", inf = 2, at = 6  },
+      {name = "Mortar Squad (6)", mortar = 6 },
+      {name = "JTAC Group (4)", inf = 3, jtac = 1 },
+      {name = "Small Platoon (16)", inf = 9, mg = 3, at = 3, aa = 1 },
+      {name = "Platoon (24)", inf = 10, mg = 5, at = 6, aa = 3 },
+    }
+    
+    
+    --add to CTLD default pickzone names.  This could be done in a loop but this should be more readable
+    --pickupZones = { "Zone name or Ship Unit Name", "smoke color", "limit (-1 unlimited)", "ACTIVE (yes/no)", "side (0 = Both sides / 1 = Red / 2 = Blue )", flag number (optional) }
+    table.insert(ctld.pickupZones, { "STAGING", RotorOps.pickup_zone_smoke, -1, "no", 0 })
+    table.insert(ctld.pickupZones, { "STAGING_BASE", RotorOps.pickup_zone_smoke, -1, "no", 0 })
+    table.insert(ctld.pickupZones, { "ALPHA_FARP", RotorOps.pickup_zone_smoke, -1, "no", 0 })
+    table.insert(ctld.pickupZones, { "BRAVO_FARP", RotorOps.pickup_zone_smoke, -1, "no", 0 })
+    table.insert(ctld.pickupZones, { "CHARLIE_FARP", RotorOps.pickup_zone_smoke, -1, "no", 0 })
+    table.insert(ctld.pickupZones, { "DELTA_FARP", RotorOps.pickup_zone_smoke, -1, "no", 0 })
+    table.insert(ctld.pickupZones, { "HELO_CARRIER", "none", -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "HELO_CARRIER_1", "none", -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops1", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops2", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops3", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops4", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops5", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops6", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops7", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops8", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops9", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
+    table.insert(ctld.pickupZones, { "troops10", RotorOps.pickup_zone_smoke, -1, "yes", 0 })
 
-   ctld.initialize(true)
+    ctld.initialize(true)
+  end
+
+  veaf.loggers.get(veaf.Id):info("schedule - init ctld for RotorOps")
+  mist.scheduleFunction(initCTLD,{},timer.getTime() + 2)
+
 end
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -539,42 +562,30 @@ veaf.silenceAtcOnAllAirbases()
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- mission-specific menus
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
-if (RotorOps) then
-    veaf.loggers.get(veaf.Id):info("init - RotorOps")
+if (veafRadio) then
 
-    if (veafNamedPoints) then
-        for _, zone in pairs(RotorOps.zones) do
-            veaf.loggers.get(veaf.Id):info("init - adding named point " .. zone.name)
-            veafNamedPoints.addPoint(zone.name, zone.point.x, zone.point.z, zone.point.y)
-        end
+    local function setRotorOpsZoneStatusDisplay(value)
+        RotorOps.zone_status_display = value
     end
 
-    if (veafRadio) then
-
-        local function setRotorOpsZoneStatusDisplay(value)
-            RotorOps.zone_status_display = value
-        end
-
-        local function menu(name, items)
-            return {
-                "menu", name, items
-            }
-        end
-
-        local function command(name, aFunction, parameters)
-            return {
-                "command", name, aFunction, parameters
-            }
-        end
-
-        local userMenu = {
-            menu("ROTOROPS", {
-                command("Status display ON", setRotorOpsZoneStatusDisplay, true),
-                command("Status display OFF", setRotorOpsZoneStatusDisplay, false),
-            })
+    local function menu(name, items)
+        return {
+            "menu", name, items
         }
-
-        veafRadio.createUserMenu(userMenu)
     end
 
+    local function command(name, aFunction, parameters)
+        return {
+            "command", name, aFunction, parameters
+        }
+    end
+
+    local userMenu = {
+        menu("ROTOROPS", {
+            command("Status display ON", setRotorOpsZoneStatusDisplay, true),
+            command("Status display OFF", setRotorOpsZoneStatusDisplay, false),
+        })
+    }
+
+    veafRadio.createUserMenu(userMenu)
 end
