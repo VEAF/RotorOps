@@ -13,6 +13,7 @@ checkboxes:
     voiceovers_checkBox: true
     force_offroad_checkBox: false
     hotstart_checkBox: false
+    veaf_checkBox: false
 disable_checkboxes: 
 spinboxes:
     blueqty_spinBox: 4
@@ -25,5 +26,3 @@ spinboxes:
 radiobuttons: farp_gunits,
 red_forces: "RED Default Armor (HARD)"
 blue_forces: "BLUE Default US Armor"
-    
-    
