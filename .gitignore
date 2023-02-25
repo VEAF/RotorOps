@@ -26,3 +26,5 @@ MissionOutput/
 .idea
 *.env
 RotorOps_setup.exe
+Generator/dcs
+todo.md
