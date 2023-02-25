@@ -162,6 +162,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.time_comboBox.addItem("Noon")
         self.time_comboBox.addItem("Random")
 
+        self.slot_template_comboBox.setCurrentIndex(1) # default to the first helo
+
 
     def connectSignalsSlots(self):
         self.action_generateMission.triggered.connect(self.generateMissionAction)
@@ -170,6 +172,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.action_nextScenario.triggered.connect(self.nextScenario)
         self.action_prevScenario.triggered.connect(self.prevScenario)
         self.actionSave_Directory.triggered.connect(self.chooseSaveDir)
+        self.actionLoad_Options.triggered.connect(self.loadOptions)
+        self.actionSave_Options.triggered.connect(self.saveOptions)
         self.action_slotChanged.triggered.connect(self.slotChanged)
         self.actionCaucasus.triggered.connect(self.filterMenuTouched)
         self.actionPersian_Gulf.triggered.connect(self.filterMenuTouched)
@@ -431,6 +435,14 @@ class Window(QMainWindow, Ui_MainWindow):
                 else:
                     button.setEnabled(True)
 
+            if 'comboboxes' in config:
+                for combobox in config['comboboxes']:
+                    qobj = QObject.findChild(self, QComboBox, combobox)
+                    if qobj:
+                        index = qobj.findText(config['comboboxes'][combobox])
+                        if index >= 0:
+                            qobj.setCurrentIndex(index)
+
             if 'blue_forces' in config:
                 for template in self.forces_list:
                     if template.basename == config['blue_forces']:
@@ -440,6 +452,9 @@ class Window(QMainWindow, Ui_MainWindow):
                 for template in self.forces_list:
                     if template.basename == config['red_forces']:
                         self.redforces_comboBox.setCurrentIndex(self.redforces_comboBox.findText(template.name))
+
+            if 'player_slots' in config:
+                self.player_slots = config["player_slots"]
 
         except Exception as e:
             logger.error("Error loading config file: " + str(e))
@@ -482,6 +497,60 @@ class Window(QMainWindow, Ui_MainWindow):
                 self.user_data["save_directory"] = path
                 self.user_output_dir = path
                 self.saveUserData()
+
+    def loadOptions(self):
+        logger.info("Loading options")
+        configFile = os.path.join(directories.home_dir, "config", "user-config.yaml")
+        config = self.loadScenarioConfig(configFile)
+        self.applyScenarioConfig(config)
+
+    def saveOptions(self):
+        logger.info("Saving options")
+
+        # fetch options in a data object
+        data = {}
+        data["checkboxes"] = {
+            "logistics_crates_checkBox": self.logistics_crates_checkBox.isChecked(),
+            "advanced_defenses_checkBox": self.advanced_defenses_checkBox.isChecked(),
+            "defense_checkBox": self.defense_checkBox.isChecked(),
+            "awacs_checkBox": self.awacs_checkBox.isChecked(),
+            "tankers_checkBox": self.tankers_checkBox.isChecked(),
+            "voiceovers_checkBox": self.voiceovers_checkBox.isChecked(),
+            "smoke_pickup_zone_checkBox": self.smoke_pickup_zone_checkBox.isChecked(),
+            "game_status_checkBox": self.game_status_checkBox.isChecked(),
+            "random_weather_checkBox": self.random_weather_checkBox.isChecked(),
+            "apcs_spawn_checkBox": self.apcs_spawn_checkBox.isChecked(),
+            "hotstart_checkBox": self.hotstart_checkBox.isChecked(),
+            "farp_spawn_checkBox": self.farp_spawn_checkBox.isChecked(),
+            "perks_checkBox": self.perks_checkBox.isChecked(),
+            "veaf_checkBox": self.veaf_checkBox.isChecked(),
+        }
+        data["spinboxes"] = {
+            "redqty_spinBox": self.redqty_spinBox.value(),
+            "blueqty_spinBox": self.blueqty_spinBox.value(),
+            "e_transport_helos_spinBox": self.e_transport_helos_spinBox.value(),
+            "e_attack_planes_spinBox": self.e_attack_planes_spinBox.value(),
+            "e_attack_helos_spinBox": self.e_attack_helos_spinBox.value(),
+            "inf_spawn_spinBox": self.inf_spawn_spinBox.value(),
+            "troop_drop_spinBox": self.troop_drop_spinBox.value(),
+        }
+        data["radiobuttons"] = {
+            "farp_always": self.farp_always.isChecked(),
+            "farp_never": self.farp_never.isChecked(),
+            "farp_gunits": self.farp_gunits.isChecked(),
+        }
+        data["comboboxes"] = {
+            #"scenario_comboBox": self.scenario_comboBox.currentText(), # don't save the scenario, it'd defeat the goal of this feature
+            "redforces_comboBox": self.redforces_comboBox.currentText(),
+            "slot_template_comboBox": self.slot_template_comboBox.currentText(),
+            "blueforces_comboBox": self.blueforces_comboBox.currentText(),
+            "time_comboBox": self.time_comboBox.currentText(),
+        }
+        data["player_slots"] = self.player_slots
+
+        configFile = os.path.join(directories.home_dir, "config", "user-config.yaml")
+        with open(configFile, 'w') as pfile:
+            yaml.dump(data, pfile)
 
 
     def scenarioChanged(self):
@@ -531,6 +600,7 @@ class Window(QMainWindow, Ui_MainWindow):
             user_rating = self.user_data['local_ratings'][self.scenario.path]
             for i in range(user_rating):
                 rate_buttons[i].setStyleSheet(star_full_ss)
+
 
     def generateMissionAction(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
